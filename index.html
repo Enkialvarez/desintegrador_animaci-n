@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desintegradores Transversales - Lab. Virtual Álvarez 2026</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap');
+
+        :root {
+            --color-prod: #2ecc71;
+            --color-cons1: #f39c12;
+            --color-cons2: #e74c3c;
+            --color-desint: #9b59b6;
+            --color-nutriente: #f1c40f;
+            --color-bg: #0a0e1a;
+            --color-panel: #111827;
+            --color-border: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background: var(--color-bg);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+            border-bottom: 2px solid var(--color-desint);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-svg {
+            width: 50px;
+            height: 50px;
+        }
+
+        .title-group h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--color-desint);
+            text-shadow: 0 0 10px rgba(155, 89, 182, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .title-group .subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, var(--color-desint), #8e44ad);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { box-shadow: 0 0 20px rgba(155, 89, 182, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(155, 89, 182, 0.7); }
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== CANVAS AREA ===== */
+        .canvas-wrapper {
+            background: var(--color-panel);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .canvas-header {
+            padding: 12px 20px;
+            background: linear-gradient(90deg, rgba(155,89,182,0.15), transparent);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .canvas-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--color-desint);
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: #10b981;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        #simCanvas {
+            display: block;
+            width: 100%;
+            height: 520px;
+            cursor: crosshair;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel {
+            background: var(--color-panel);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Legend */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .legend-item:last-child {
+            border-bottom: none;
+        }
+
+        .legend-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .legend-info h4 {
+            font-size: 0.8rem;
+            color: #e2e8f0;
+            margin-bottom: 2px;
+        }
+
+        .legend-info p {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        /* Stats */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .stat-value.purple { color: var(--color-desint); }
+        .stat-value.green { color: var(--color-prod); }
+        .stat-value.yellow { color: var(--color-nutriente); }
+
+        /* Progress bar */
+        .progress-container {
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            background: rgba(255,255,255,0.03);
+            color: #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: var(--color-desint);
+        }
+
+        .btn.active {
+            background: var(--color-desint);
+            border-color: var(--color-desint);
+            color: white;
+            box-shadow: 0 0 15px rgba(155, 89, 182, 0.4);
+        }
+
+        .slider-container {
+            margin-top: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--color-desint);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(155, 89, 182, 0.5);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: #475569;
+            margin-top: 4px;
+        }
+
+        /* Explanation box */
+        .explanation {
+            background: linear-gradient(135deg, rgba(155,89,182,0.1), rgba(155,89,182,0.02));
+            border-left: 3px solid var(--color-desint);
+            padding: 15px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .explanation p {
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .explanation .highlight {
+            color: var(--color-desint);
+            font-weight: 700;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid var(--color-desint);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+            max-width: 250px;
+            box-shadow: 0 0 20px rgba(155, 89, 182, 0.3);
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        .tooltip h4 {
+            color: var(--color-desint);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+        }
+
+        .tooltip p {
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.7rem;
+            color: #475569;
+        }
+
+        .footer .author {
+            color: var(--color-desint);
+        }
+
+        /* Animation keyframes for particles */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo-area">
+            <svg class="logo-svg" viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#9b59b6"/>
+                        <stop offset="100%" style="stop-color:#8e44ad"/>
+                    </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="45" fill="none" stroke="url(#logoGrad)" stroke-width="2" opacity="0.3"/>
+                <circle cx="50" cy="50" r="35" fill="none" stroke="url(#logoGrad)" stroke-width="1" opacity="0.5"/>
+                <text x="50" y="58" text-anchor="middle" fill="url(#logoGrad)" font-family="Orbitron" font-size="28" font-weight="900">D</text>
+                <circle cx="50" cy="50" r="45" fill="none" stroke="url(#logoGrad)" stroke-width="1" stroke-dasharray="5,5" opacity="0.6">
+                    <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+            <div class="title-group">
+                <h1>DESINTEGRADORES TRANSVERSALES</h1>
+                <div class="subtitle">Lab. Virtual Álvarez 2026 • CNEyT III</div>
+            </div>
+        </div>
+        <div class="badge">♻️ RECICLAJE</div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="main-container">
+        <!-- CANVAS AREA -->
+        <div class="canvas-wrapper">
+            <div class="canvas-header">
+                <h2>🔄 Simulación de Flujo Transversal</h2>
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>EN VIVO</span>
+                </div>
+            </div>
+            <canvas id="simCanvas"></canvas>
+            <div class="tooltip" id="tooltip"></div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <!-- Legend -->
+            <div class="panel">
+                <div class="panel-title">📋 Leyenda del Ecosistema</div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: rgba(46,204,113,0.2);">🌿</div>
+                    <div class="legend-info">
+                        <h4>Productores (Nivel 1)</h4>
+                        <p>Biomasa: 10,000 kg/ha</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: rgba(243,156,18,0.2);">🐇</div>
+                    <div class="legend-info">
+                        <h4>Consumidores Primarios (Nivel 2)</h4>
+                        <p>Biomasa: 1,000 kg/ha</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: rgba(231,76,60,0.2);">🦅</div>
+                    <div class="legend-info">
+                        <h4>Consumidores Secundarios (Nivel 3)</h4>
+                        <p>Biomasa: 100 kg/ha</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: rgba(155,89,182,0.3); animation: float 2s infinite;">🍄</div>
+                    <div class="legend-info">
+                        <h4 style="color: var(--color-desint);">Desintegradores (TRANSVERSAL)</h4>
+                        <p>Biomasa: Variable / Reciclaje</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="panel">
+                <div class="panel-title">📊 Métricas en Tiempo Real</div>
+                <div class="stat-row">
+                    <span class="stat-label">Desechos reciclados</span>
+                    <span class="stat-value purple" id="recycledCount">0</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="recycleProgress" style="width: 0%; background: var(--color-desint);"></div>
+                    </div>
+                </div>
+                <div class="stat-row" style="margin-top: 10px;">
+                    <span class="stat-label">Nutrientes devueltos</span>
+                    <span class="stat-value yellow" id="nutrientCount">0</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="nutrientProgress" style="width: 0%; background: var(--color-nutriente);"></div>
+                    </div>
+                </div>
+                <div class="stat-row" style="margin-top: 10px;">
+                    <span class="stat-label">Eficiencia del ciclo</span>
+                    <span class="stat-value green" id="efficiency">0%</span>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="panel">
+                <div class="panel-title">🎮 Controles</div>
+                <div class="control-group">
+                    <label class="control-label">Velocidad de simulación</label>
+                    <div class="slider-container">
+                        <input type="range" id="speedSlider" min="1" max="5" value="3" step="1">
+                        <div class="slider-labels">
+                            <span>Lento</span>
+                            <span>Normal</span>
+                            <span>Rápido</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Mostrar flujos</label>
+                    <div class="btn-group">
+                        <button class="btn active" id="btnFlows" onclick="toggleFlows()">✓ Activos</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Modo de visualización</label>
+                    <div class="btn-group">
+                        <button class="btn active" id="btnNormal" onclick="setMode('normal')">Normal</button>
+                        <button class="btn" id="btnHighlight" onclick="setMode('highlight')">Resaltar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explanation -->
+            <div class="panel explanation">
+                <div class="panel-title">💡 ¿Por qué "Transversal"?</div>
+                <p>
+                    Los <span class="highlight">desintegradores</span> no pertenecen a un solo nivel. Actúan en <span class="highlight">TODOS</span> los niveles reciclando desechos y devolviendo nutrientes al suelo. Por eso su biomasa no se asigna a un nivel específico — se marca como <span class="highlight">"Variable"</span> o <span class="highlight">"Reciclaje"</span>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="author">Biol. Ángel Enrique Torres Álvarez</span> • CETIS 43 • Xochitepec, Morelos • Lab. Virtual Álvarez 2026
+    </div>
+
+    <script>
+        // ===== CANVAS SETUP =====
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const tooltip = document.getElementById('tooltip');
+
+        let width, height;
+        let animationId;
+        let time = 0;
+        let speed = 3;
+        let showFlows = true;
+        let mode = 'normal';
+
+        // Stats
+        let recycledCount = 0;
+        let nutrientCount = 0;
+
+        // Resize canvas
+        function resize() {
+            const wrapper = canvas.parentElement;
+            width = wrapper.clientWidth;
+            height = 520;
+            canvas.width = width * window.devicePixelRatio;
+            canvas.height = height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // ===== LEVELS DATA =====
+        const levels = [
+            { id: 0, name: 'Productores', emoji: '🌿', color: '#2ecc71', biomasa: 10000, y: 0.75, width: 0.6 },
+            { id: 1, name: 'Consumidores Primarios', emoji: '🐇', color: '#f39c12', biomasa: 1000, y: 0.50, width: 0.4 },
+            { id: 2, name: 'Consumidores Secundarios', emoji: '🦅', color: '#e74c3c', biomasa: 100, y: 0.25, width: 0.2 }
+        ];
+
+        // ===== PARTICLES SYSTEM =====
+        class Particle {
+            constructor(type, x, y, targetX, targetY) {
+                this.type = type; // 'waste', 'nutrient', 'desintegrator'
+                this.x = x;
+                this.y = y;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.progress = 0;
+                this.speed = 0.01 + Math.random() * 0.02;
+                this.size = type === 'desintegrator' ? 6 : 3 + Math.random() * 3;
+                this.opacity = 1;
+                this.wobble = Math.random() * Math.PI * 2;
+
+                if (type === 'desintegrator') {
+                    this.color = '#9b59b6';
+                    this.glow = true;
+                } else if (type === 'waste') {
+                    this.color = '#7f8c8d';
+                } else {
+                    this.color = '#f1c40f';
+                    this.glow = true;
+                }
+            }
+
+            update() {
+                this.progress += this.speed * (speed / 3);
+                this.wobble += 0.1;
+
+                const t = this.progress;
+                // Bezier curve with wobble
+                const midX = (this.x + this.targetX) / 2 + Math.sin(this.wobble) * 30;
+                const midY = (this.y + this.targetY) / 2;
+
+                this.currentX = (1-t)*(1-t)*this.x + 2*(1-t)*t*midX + t*t*this.targetX;
+                this.currentY = (1-t)*(1-t)*this.y + 2*(1-t)*t*midY + t*t*this.targetY;
+
+                if (this.progress >= 1) {
+                    this.opacity -= 0.05;
+                }
+
+                return this.opacity > 0;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+
+                if (this.glow) {
+                    ctx.shadowColor = this.color;
+                    ctx.shadowBlur = 15;
+                }
+
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+
+                if (this.type === 'desintegrator') {
+                    // Draw mushroom-like shape
+                    ctx.arc(this.currentX, this.currentY - 2, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#6c3483';
+                    ctx.fillRect(this.currentX - 2, this.currentY, 4, this.size);
+                } else {
+                    ctx.arc(this.currentX, this.currentY, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        let particles = [];
+
+        // ===== DESINTEGRATOR AGENTS =====
+        class Desintegrator {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.level = Math.floor(Math.random() * 3); // Start at random level
+                this.x = width * 0.85;
+                this.y = this.getLevelY(this.level);
+                this.targetLevel = (this.level + 1) % 3;
+                this.targetY = this.getLevelY(this.targetLevel);
+                this.progress = 0;
+                this.state = 'moving'; // moving, collecting, recycling
+                this.collectTimer = 0;
+                this.wasteCollected = 0;
+                this.angle = 0;
+            }
+
+            getLevelY(lvl) {
+                return levels[lvl].y * height;
+            }
+
+            update() {
+                this.angle += 0.05;
+
+                if (this.state === 'moving') {
+                    this.progress += 0.008 * (speed / 3);
+                    const t = this.progress;
+                    // Move in a wave pattern across levels
+                    const startY = this.getLevelY(this.level);
+                    const endY = this.getLevelY(this.targetLevel);
+
+                    // Create a "transversal" path - goes down through all levels
+                    this.y = startY + (endY - startY) * t + Math.sin(t * Math.PI) * 40;
+                    this.x = width * 0.85 - Math.sin(t * Math.PI * 2) * 30;
+
+                    // Emit waste particles while moving
+                    if (Math.random() < 0.1 * speed) {
+                        particles.push(new Particle('waste', 
+                            this.x + (Math.random() - 0.5) * 40, 
+                            this.y, 
+                            this.x, 
+                            this.y + 50
+                        ));
+                    }
+
+                    if (this.progress >= 1) {
+                        this.state = 'collecting';
+                        this.collectTimer = 60;
+                        this.wasteCollected = Math.floor(Math.random() * 5) + 3;
+                    }
+                } else if (this.state === 'collecting') {
+                    this.collectTimer--;
+                    // Pulse effect
+                    this.pulse = Math.sin(this.angle * 3) * 0.3 + 1;
+
+                    if (this.collectTimer <= 0) {
+                        this.state = 'recycling';
+                        // Spawn nutrient particles going down to soil
+                        for (let i = 0; i < this.wasteCollected; i++) {
+                            setTimeout(() => {
+                                particles.push(new Particle('nutrient',
+                                    this.x + (Math.random() - 0.5) * 30,
+                                    this.y,
+                                    width * 0.3 + Math.random() * width * 0.4,
+                                    height * 0.92
+                                ));
+                            }, i * 100);
+                        }
+                        recycledCount += this.wasteCollected;
+                        nutrientCount += this.wasteCollected;
+                        updateStats();
+                    }
+                } else if (this.state === 'recycling') {
+                    this.progress -= 0.01 * (speed / 3);
+                    if (this.progress <= 0) {
+                        this.level = this.targetLevel;
+                        this.targetLevel = (this.targetLevel + 1) % 3;
+                        this.progress = 0;
+                        this.state = 'moving';
+                    }
+                }
+            }
+
+            draw(ctx) {
+                const x = this.x;
+                const y = this.y;
+                const pulse = this.state === 'collecting' ? (this.pulse || 1) : 1;
+                const size = 20 * pulse;
+
+                ctx.save();
+
+                // Glow effect
+                ctx.shadowColor = '#9b59b6';
+                ctx.shadowBlur = 25 * pulse;
+
+                // Main body - mushroom shape
+                ctx.fillStyle = '#9b59b6';
+                ctx.beginPath();
+                ctx.arc(x, y - 5, size * 0.8, Math.PI, 0);
+                ctx.bezierCurveTo(x + size * 0.8, y + size * 0.3, x + size * 0.3, y + size, x, y + size);
+                ctx.bezierCurveTo(x - size * 0.3, y + size, x - size * 0.8, y + size * 0.3, x - size * 0.8, y - 5);
+                ctx.fill();
+
+                // Stem
+                ctx.fillStyle = '#8e44ad';
+                ctx.fillRect(x - size * 0.2, y, size * 0.4, size * 0.8);
+
+                // Eyes
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(x - size * 0.25, y - size * 0.2, size * 0.15, 0, Math.PI * 2);
+                ctx.arc(x + size * 0.25, y - size * 0.2, size * 0.15, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#2c3e50';
+                ctx.beginPath();
+                ctx.arc(x - size * 0.25, y - size * 0.2, size * 0.08, 0, Math.PI * 2);
+                ctx.arc(x + size * 0.25, y - size * 0.2, size * 0.08, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Spots on mushroom cap
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.arc(x - size * 0.3, y - size * 0.5, size * 0.12, 0, Math.PI * 2);
+                ctx.arc(x + size * 0.2, y - size * 0.6, size * 0.1, 0, Math.PI * 2);
+                ctx.arc(x, y - size * 0.7, size * 0.08, 0, Math.PI * 2);
+                ctx.fill();
+
+                // State indicator
+                if (this.state === 'collecting') {
+                    ctx.fillStyle = '#f1c40f';
+                    ctx.font = `${size * 0.5}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText('♻️', x, y - size * 1.2);
+                }
+
+                // Label
+                ctx.fillStyle = '#e2e8f0';
+                ctx.font = '10px Roboto Mono';
+                ctx.textAlign = 'center';
+                ctx.fillText('Desintegrador', x, y + size * 1.5);
+
+                ctx.restore();
+            }
+        }
+
+        const desintegrators = [new Desintegrator(), new Desintegrator(), new Desintegrator()];
+
+        // ===== DRAW FUNCTIONS =====
+        function drawPyramid() {
+            const centerX = width * 0.4;
+
+            levels.forEach((level, i) => {
+                const y = level.y * height;
+                const w = level.width * width * 0.5;
+                const h = height * 0.18;
+
+                // Level background
+                ctx.save();
+                ctx.fillStyle = level.color + '15';
+                ctx.strokeStyle = level.color + '60';
+                ctx.lineWidth = 2;
+
+                // Rounded rect
+                ctx.beginPath();
+                ctx.roundRect(centerX - w/2, y - h/2, w, h, 12);
+                ctx.fill();
+                ctx.stroke();
+
+                // Glow in highlight mode
+                if (mode === 'highlight') {
+                    ctx.shadowColor = level.color;
+                    ctx.shadowBlur = 20;
+                    ctx.strokeStyle = level.color;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+
+                // Emoji
+                ctx.font = '40px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(level.emoji, centerX - w/2 + 40, y);
+
+                // Text
+                ctx.fillStyle = '#e2e8f0';
+                ctx.font = 'bold 13px Roboto Mono';
+                ctx.textAlign = 'left';
+                ctx.fillText(level.name, centerX - w/2 + 75, y - 8);
+
+                ctx.fillStyle = level.color;
+                ctx.font = '11px Roboto Mono';
+                ctx.fillText(`Biomasa: ${level.biomasa.toLocaleString()} kg/ha`, centerX - w/2 + 75, y + 10);
+
+                // Level number badge
+                ctx.fillStyle = level.color + '40';
+                ctx.beginPath();
+                ctx.arc(centerX + w/2 - 25, y, 18, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = level.color;
+                ctx.font = 'bold 12px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.fillText(`N${i+1}`, centerX + w/2 - 25, y + 1);
+
+                ctx.restore();
+            });
+        }
+
+        function drawSoil() {
+            const soilY = height * 0.92;
+
+            ctx.save();
+            // Soil gradient
+            const gradient = ctx.createLinearGradient(0, soilY - 30, 0, height);
+            gradient.addColorStop(0, '#5d4037');
+            gradient.addColorStop(1, '#3e2723');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, soilY - 30, width, height - soilY + 30);
+
+            // Soil texture dots
+            ctx.fillStyle = '#4e342e';
+            for (let i = 0; i < 50; i++) {
+                const x = (Math.sin(i * 3.7 + time * 0.001) * 0.5 + 0.5) * width;
+                const y = soilY + (Math.cos(i * 2.3) * 0.5 + 0.5) * (height - soilY);
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Label
+            ctx.fillStyle = '#d7ccc8';
+            ctx.font = 'bold 14px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText('🌱 SUELO (Reserva de Nutrientes)', width / 2, soilY - 10);
+
+            // Nutrient glow
+            ctx.shadowColor = '#f1c40f';
+            ctx.shadowBlur = 30;
+            ctx.fillStyle = '#f1c40f';
+            ctx.font = '12px Roboto Mono';
+            ctx.fillText(`Nutrientes acumulados: ${nutrientCount}`, width / 2, soilY + 15);
+            ctx.shadowBlur = 0;
+
+            ctx.restore();
+        }
+
+        function drawTransversalArrows() {
+            if (!showFlows) return;
+
+            const arrowX = width * 0.72;
+            const arrowColor = '#9b59b6';
+
+            ctx.save();
+            ctx.strokeStyle = arrowColor;
+            ctx.fillStyle = arrowColor;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 4]);
+
+            // Draw vertical flow line showing transversal nature
+            const topY = levels[2].y * height - 40;
+            const bottomY = levels[0].y * height + 40;
+
+            ctx.beginPath();
+            ctx.moveTo(arrowX, topY);
+            ctx.lineTo(arrowX, bottomY);
+            ctx.stroke();
+
+            // Animated arrows along the line
+            const arrowCount = 3;
+            for (let i = 0; i < arrowCount; i++) {
+                const t = ((time * 0.02 * speed + i / arrowCount) % 1);
+                const y = topY + (bottomY - topY) * t;
+
+                ctx.save();
+                ctx.globalAlpha = 0.6 + Math.sin(time * 0.05 + i) * 0.4;
+                ctx.translate(arrowX, y);
+
+                // Down arrow
+                ctx.beginPath();
+                ctx.moveTo(-8, -5);
+                ctx.lineTo(0, 8);
+                ctx.lineTo(8, -5);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+            // Label
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#9b59b6';
+            ctx.font = 'bold 11px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.save();
+            ctx.translate(arrowX + 25, (topY + bottomY) / 2);
+            ctx.rotate(Math.PI / 2);
+            ctx.fillText('FLUJO TRANSVERSAL', 0, 0);
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        function drawNutrientCycle() {
+            if (!showFlows) return;
+
+            // Draw curved arrows from soil back to producers
+            const startX = width * 0.5;
+            const startY = height * 0.92;
+            const endX = width * 0.4;
+            const endY = levels[0].y * height + 40;
+
+            ctx.save();
+            ctx.strokeStyle = '#f1c40f';
+            ctx.fillStyle = '#f1c40f';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 6]);
+
+            // Curved path
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.quadraticCurveTo(width * 0.2, (startY + endY) / 2, endX, endY);
+            ctx.stroke();
+
+            // Animated arrow
+            const t = (time * 0.015 * speed) % 1;
+            const mt = 1 - t;
+            const ax = mt * mt * startX + 2 * mt * t * width * 0.2 + t * t * endX;
+            const ay = mt * mt * startY + 2 * mt * t * (startY + endY) / 2 + t * t * endY;
+
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 0.8;
+            ctx.beginPath();
+            ctx.arc(ax, ay, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Label
+            ctx.fillStyle = '#f1c40f';
+            ctx.font = '10px Roboto Mono';
+            ctx.textAlign = 'center';
+            ctx.fillText('↑ NUTRIENTES', width * 0.25, (startY + endY) / 2);
+
+            ctx.restore();
+        }
+
+        function drawGrid() {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+            ctx.lineWidth = 1;
+
+            for (let x = 0; x < width; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < height; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawTitle() {
+            ctx.save();
+            ctx.fillStyle = 'rgba(155, 89, 182, 0.1)';
+            ctx.font = 'bold 80px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText('TRANSVERSAL', width / 2, height / 2);
+            ctx.restore();
+        }
+
+        // ===== MAIN ANIMATION LOOP =====
+        function animate() {
+            time++;
+
+            // Clear
+            ctx.clearRect(0, 0, width, height);
+
+            // Background grid
+            drawGrid();
+
+            // Title watermark
+            drawTitle();
+
+            // Draw pyramid levels
+            drawPyramid();
+
+            // Draw soil
+            drawSoil();
+
+            // Draw transversal arrows
+            drawTransversalArrows();
+
+            // Draw nutrient cycle
+            drawNutrientCycle();
+
+            // Update and draw desintegrators
+            desintegrators.forEach(d => {
+                d.update();
+                d.draw(ctx);
+            });
+
+            // Update and draw particles
+            particles = particles.filter(p => {
+                const alive = p.update();
+                if (alive) p.draw(ctx);
+                return alive;
+            });
+
+            // Randomly spawn new desintegrator particles
+            if (time % (120 / speed) === 0) {
+                const level = Math.floor(Math.random() * 3);
+                const levelY = levels[level].y * height;
+                particles.push(new Particle('desintegrator',
+                    width * 0.3 + Math.random() * width * 0.3,
+                    levelY,
+                    width * 0.85,
+                    levelY
+                ));
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // ===== STATS UPDATE =====
+        function updateStats() {
+            document.getElementById('recycledCount').textContent = recycledCount;
+            document.getElementById('nutrientCount').textContent = nutrientCount;
+
+            const maxRecycle = 500;
+            const maxNutrient = 500;
+
+            document.getElementById('recycleProgress').style.width = Math.min((recycledCount / maxRecycle) * 100, 100) + '%';
+            document.getElementById('nutrientProgress').style.width = Math.min((nutrientCount / maxNutrient) * 100, 100) + '%';
+
+            const efficiency = Math.min((nutrientCount / Math.max(recycledCount, 1)) * 100, 100);
+            document.getElementById('efficiency').textContent = efficiency.toFixed(1) + '%';
+        }
+
+        // ===== CONTROLS =====
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            speed = parseInt(e.target.value);
+        });
+
+        function toggleFlows() {
+            showFlows = !showFlows;
+            const btn = document.getElementById('btnFlows');
+            btn.textContent = showFlows ? '✓ Activos' : '✗ Ocultos';
+            btn.classList.toggle('active', showFlows);
+        }
+
+        function setMode(m) {
+            mode = m;
+            document.getElementById('btnNormal').classList.toggle('active', m === 'normal');
+            document.getElementById('btnHighlight').classList.toggle('active', m === 'highlight');
+        }
+
+        // ===== TOOLTIP =====
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width / window.devicePixelRatio);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height / window.devicePixelRatio);
+
+            // Check if hovering over levels
+            const centerX = width * 0.4;
+            let hovered = null;
+
+            levels.forEach((level, i) => {
+                const ly = level.y * height;
+                const lw = level.width * width * 0.5;
+                const lh = height * 0.18;
+
+                if (x > centerX - lw/2 && x < centerX + lw/2 &&
+                    y > ly - lh/2 && y < ly + lh/2) {
+                    hovered = {
+                        title: `${level.emoji} ${level.name}`,
+                        text: `Nivel trófico ${i+1}\nBiomasa: ${level.biomasa.toLocaleString()} kg/ha\nLos desintegradores también actúan aquí reciclando desechos.`
+                    };
+                }
+            });
+
+            // Check desintegrators
+            if (!hovered) {
+                desintegrators.forEach(d => {
+                    const dx = d.x - x;
+                    const dy = d.y - y;
+                    if (dx*dx + dy*dy < 900) {
+                        hovered = {
+                            title: '🍄 Desintegrador',
+                            text: `Estado: ${d.state === 'moving' ? 'Moviéndose transversalmente' : d.state === 'collecting' ? 'Reciclando desechos' : 'Devolviendo nutrientes'}\nNivel actual: ${d.level + 1}\nDesechos recolectados: ${d.wasteCollected}`
+                        };
+                    }
+                });
+            }
+
+            if (hovered) {
+                tooltip.innerHTML = `<h4>${hovered.title}</h4><p>${hovered.text.replace(/\n/g, '<br>')}</p>`;
+                tooltip.style.left = (e.clientX - rect.left + 15) + 'px';
+                tooltip.style.top = (e.clientY - rect.top) + 'px';
+                tooltip.classList.add('show');
+            } else {
+                tooltip.classList.remove('show');
+            }
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            tooltip.classList.remove('show');
+        });
+
+        // ===== START =====
+        animate();
+    </script>
+</body>
+</html>
